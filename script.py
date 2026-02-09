@@ -34,7 +34,7 @@ class parking:
     def menu(self):
         while True:
             erase_screen()
-            print("1. Check-in\n2. Check-out\n3. Listar carros\n4. Sair")
+            print("1. Check-in\n2. Check-out\n3. Listar carros\n4. Buscar dados\n5. Sair")
             choose = input()
             try:
                 float(choose)
@@ -44,7 +44,8 @@ class parking:
                 input()
                 return
             
-            if float(choose) < 1 or float(choose) > 4:
+            if float(choose) < 1 or float(choose) > 5:
+                erase_screen()
                 print("ERRO! Escolha um número válido!")
                 input()
                 return
@@ -118,6 +119,36 @@ class parking:
         elif choose == '3':
             self.show_parking()
         elif choose == '4':
+            erase_screen()
+            print("Qual a PLACA do carro?")
+            plate_info = input()
+            car_info = None
+            erase_screen()
+            for spot, vehicle in self.parking_lot.items():
+                if vehicle is not None and vehicle.license_plate == plate_info:
+                    car_info = vehicle
+            if car_info == None:
+                print("CARRO NÃO ENCONTRADO!")
+                input()
+                return
+            
+            seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
+            s = seconds_now - car_info.second
+            hours_total = s // 3600
+            minutes_total = (s % 3600) // 60
+            second_total = s % 60
+            price_total = s * price_seconds
+
+            print(f"INFORMAÇÕES - {plate_info}\n")
+            print(f"Placa: {car_info.license_plate}")
+            print(f"Modelo: {car_info.car_model}")
+            print(f"Cor: {car_info.color}")
+            print(f"Horário de entrada: {car_info.time}")
+            print(f"Vaga: {car_info.parking_lot}")
+            print(f"Tempo: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
+            print(f"Preço: R${price_total:.2f}")
+            input()
+        elif choose == '5':
             erase_screen()
             print("Salvando dados...")
             time.sleep(0.5)
