@@ -7,12 +7,13 @@ def erase_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class car:
-    def __init__(self, license_plate, car_model, color, time, parking_lot):
+    def __init__(self, license_plate, car_model, color, time, parking_lot, seconds):
         self.license_plate = license_plate
         self.car_model = car_model
         self.color = color
         self.time = time
         self.parking_lot = parking_lot
+        self.second = seconds
 
 class parking:
     def __init__(self):
@@ -46,27 +47,56 @@ class parking:
             plate = input()
             model = input()
             color = input()
-            hour = datetime.now()
+            hour = datetime.now().strftime("%H:%M:%S")
+            now = datetime.now()
+            seconds_checkin = now.hour * 3600 + now.minute * 60 + now.second
             for spot, vehicle in self.parking_lot.items():
                 if vehicle is None:
                     lot_parking = spot
                     break
 
-            self.check_in(plate, model, color, hour, lot_parking)
+            self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
             erase_screen()
             print("VEICULO CADASTRADO!")
             print(f"VAGA: {lot_parking}")
             input()
+        elif choose == '2':
+            erase_screen()
+            
+            print("Qual a placa do carro?")
+            license_plate = input()
 
+            for spot, vehicle in self.parking_lot.items():
+                if vehicle is not None and vehicle.license_plate == license_plate:
+                    check_out_car = vehicle
+            erase_screen()
+
+            seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
+            s = seconds_now - check_out_car.second
+            hours_total = s // 3600
+            minutes_total = (s % 3600) // 60
+            second_total = s % 60
+            print("CHECK-OUT CONCLUIDO!\n")
+            print(f"PLACA: {check_out_car.license_plate}")
+            print(f"MODELO: {check_out_car.car_model}")
+            print(f"VAGA: {check_out_car.parking_lot}")
+            print(f"TEMPO: {hours_total}:{minutes_total}:{second_total}")
+            self.parking_lot[check_out_car.parking_lot] = None
+            input()
         elif choose == '3':
             self.show_parking()
 
-    def check_in(self, license_plate, model, color, time, parking_lot):
-        self.parking_lot[parking_lot] = car(license_plate, model, color, time, parking_lot)
+    def check_in(self, license_plate, model, color, time, parking_lot, seconds):
+        self.parking_lot[parking_lot] = car(license_plate, model, color, time, parking_lot, seconds)
         
     def show_parking(self):
+        row = 0
         erase_screen()
         for spot, vehicle in self.parking_lot.items():
+            row += 1
+            if row == 10:
+                print()
+                row = 1
             if vehicle is None:
                 print(f"Vaga {spot}: [ VAZIA ]")
             else:
