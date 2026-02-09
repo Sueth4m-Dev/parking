@@ -1,6 +1,15 @@
 import os, json, time
 from datetime import datetime
 
+# AJUSTE DE ACORDO COM SEU PREÇO
+price_hour = 30
+# -----------------
+
+end_program = False
+price_minute = price_hour / 60
+price_seconds = price_minute / 60
+
+
 def erase_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -30,6 +39,7 @@ class parking:
             try:
                 float(choose)
             except ValueError:
+                erase_screen()
                 print("ERRO! Digite um número!")
                 input()
                 return
@@ -44,8 +54,23 @@ class parking:
             erase_screen()
             print("Qual a PLACA, MODELO e COR?")
             plate = input()
+            if plate == '':
+                erase_screen()
+                print("PLACA INVÁLIDA!")
+                input()
+                return
             model = input()
+            if model == '':
+                erase_screen()
+                print("MODELO INVÁLIDA!")
+                input()
+                return
             color = input()
+            if color == '':
+                erase_screen()
+                print("COR INVÁLIDA!")
+                input()
+                return
             hour = datetime.now().strftime("%H:%M:%S")
             now = datetime.now()
             seconds_checkin = now.hour * 3600 + now.minute * 60 + now.second
@@ -63,10 +88,16 @@ class parking:
         elif choose == '2':
             erase_screen()
             print("Qual a placa do carro?")
+            check_out_car = None
             license_plate = input()
             for spot, vehicle in self.parking_lot.items():
                 if vehicle is not None and vehicle.license_plate == license_plate:
                     check_out_car = vehicle
+            if check_out_car == None:
+                erase_screen()
+                print("CARRO NÃO ENCONTRADO!")
+                input()
+                return
 
             erase_screen()
             seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
@@ -74,14 +105,16 @@ class parking:
             hours_total = s // 3600
             minutes_total = (s % 3600) // 60
             second_total = s % 60
+            price_total = s * price_seconds
             print("CHECK-OUT CONCLUIDO!\n")
             print(f"PLACA: {check_out_car.license_plate}")
             print(f"MODELO: {check_out_car.car_model}")
             print(f"VAGA: {check_out_car.parking_lot}")
-            print(f"TEMPO: {hours_total}:{minutes_total}:{second_total}")
+            print(f"TEMPO: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
+            print(f"PREÇO: R${price_total:.2f}")
             self.parking_lot[check_out_car.parking_lot] = None
             input()
-            self.save_data()
+            self.save_data() 
         elif choose == '3':
             self.show_parking()
         elif choose == '4':
@@ -90,6 +123,7 @@ class parking:
             time.sleep(0.5)
             print("Finalizando programa...")
             time.sleep(0.5)
+            return True
 
     def check_in(self, license_plate, model, color, time, parking_lot, seconds):
         self.parking_lot[parking_lot] = car(license_plate, model, color, time, parking_lot, seconds)
@@ -135,8 +169,9 @@ class parking:
                         )
 
 estacionamento = parking()
-while True:
-    estacionamento.menu()
+end = False
+while not end:
+    end = estacionamento.menu()
 
 
 # VOCE ESTÁ TENTANDO SALVAR OS DADOS DOS CARROS NO JSON, E ACABOU SE DEPARANDO COM UM ERRO, 
