@@ -61,12 +61,13 @@ class parking:
                 if lot == '':
                     print(f"VAGA: {lot_parking}")
                     break
-                elif lot in self.parking_lot:
+                elif lot in self.parking_lot and self.parking_lot[lot] is None:
                     print(f"VAGA: {lot}")
                     lot_parking = lot
                     break
                 else:
-                    ut.ERROR('Vaga não encontrada!')
+                    ut.ERROR('Vaga não encontrada ou já ocupada!')
+                    input()
 
             self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
             input()
