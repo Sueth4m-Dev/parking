@@ -49,10 +49,26 @@ class parking:
                     lot_parking = spot
                     break
 
-            self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
+            
             ut.erase_screen()
-            print(ut.color('VEICULO CADASTRADO!', 'green'))
-            print(f"VAGA: {lot_parking}")
+            print(ut.color('VEICULO CADASTRADO!', 'green')) 
+            input()
+            while True:
+                ut.erase_screen()
+                self.show_parking()
+                print("Escolha uma vaga: (Deixe em branco para selecionar automaticamente)") 
+                lot = input().upper()
+                if lot == '':
+                    print(f"VAGA: {lot_parking}")
+                    break
+                elif lot in self.parking_lot:
+                    print(f"VAGA: {lot}")
+                    lot_parking = lot
+                    break
+                else:
+                    ut.ERROR('Vaga não encontrada!')
+
+            self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
             input()
             self.save_data()
         elif choose == 2:
@@ -87,6 +103,7 @@ class parking:
             self.save_data() 
         elif choose == 3:
             self.show_parking()
+            input()
         elif choose == 4:
             ut.erase_screen()
             print("Qual a PLACA do carro?")
@@ -140,7 +157,6 @@ class parking:
                 print(ut.color(f'Vaga {spot}: [ VAZIA ]', 'green'))
             else:
                 print(ut.color(f'Vaga {spot}: [ {vehicle.license_plate} - {vehicle.car_model} ]', 'red'))
-        input()
 
     def save_data(self):
         data_to_save = {}
