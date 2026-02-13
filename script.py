@@ -35,106 +35,14 @@ class parking:
         choose = ut.read_int('', 1, 5)
 
         if choose == 1:
-            ut.erase_screen()
-            print(f"Qual a {ut.color("PLACA", "yellow")}, {ut.color('MODELO', 'green')} e {ut.color("COR", 'blue')}?")
-            plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres!', False, 7, 7).upper()
-            model = ut.read_name('Modelo inválido!', 'O modelo deve ter mais de 2 caracteres!', False).upper()
-            color = ut.read_name('Cor inválida!', 'A cor deve ter mais de 2 caracteres!').upper()
-
-            hour = datetime.now().strftime("%H:%M:%S")
-            now = datetime.now()
-            seconds_checkin = now.hour * 3600 + now.minute * 60 + now.second
-            for spot, vehicle in self.parking_lot.items():
-                if vehicle is None:
-                    lot_parking = spot
-                    break
-
-            
-            ut.erase_screen()
-            print(ut.color('VEICULO CADASTRADO!', 'green')) 
-            input()
-            while True:
-                ut.erase_screen()
-                self.show_parking()
-                print("Escolha uma vaga: (Deixe em branco para selecionar automaticamente)") 
-                lot = input().upper()
-                if lot == '':
-                    print(f"VAGA: {lot_parking}")
-                    break
-                elif lot in self.parking_lot and self.parking_lot[lot] is None:
-                    print(f"VAGA: {lot}")
-                    lot_parking = lot
-                    break
-                else:
-                    ut.ERROR('Vaga não encontrada ou já ocupada!')
-                    input()
-
-            self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
-            input()
-            self.save_data()
+           self.process_checkin() 
         elif choose == 2:
-            ut.erase_screen()
-            print("Qual a placa do carro?")
-            check_out_car = None
-            license_plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
-            for spot, vehicle in self.parking_lot.items():
-                if vehicle is not None and vehicle.license_plate == license_plate:
-                    check_out_car = vehicle
-            if check_out_car == None:
-                ut.erase_screen()
-                ut.ERROR('CARRO NÃO ENCONTRADO')
-                input()
-                return
-
-            ut.erase_screen()
-            seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
-            s = seconds_now - check_out_car.second
-            hours_total = s // 3600
-            minutes_total = (s % 3600) // 60
-            second_total = s % 60
-            price_total = s * price_seconds
-            print(ut.color('CHECK-OUT CONCLUIDO!', 'green'))
-            print(f"PLACA: {check_out_car.license_plate}")
-            print(f"MODELO: {check_out_car.car_model}")
-            print(f"VAGA: {check_out_car.parking_lot}")
-            print(f"TEMPO: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
-            print(f"PREÇO: R${price_total:.2f}")
-            self.parking_lot[check_out_car.parking_lot] = None
-            input()
-            self.save_data() 
+            self.process_checkout()
         elif choose == 3:
             self.show_parking()
             input()
         elif choose == 4:
-            ut.erase_screen()
-            print("Qual a PLACA do carro?")
-            plate_info = ut.read_name('PLACA INVÁLIDA!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
-            car_info = None
-            ut.erase_screen()
-            for spot, vehicle in self.parking_lot.items():
-                if vehicle is not None and vehicle.license_plate == plate_info:
-                    car_info = vehicle
-            if car_info == None:
-                ut.ERROR('CARRO NÃO ENCONTRADO!')
-                input()
-                return
-            
-            seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
-            s = seconds_now - car_info.second
-            hours_total = s // 3600
-            minutes_total = (s % 3600) // 60
-            second_total = s % 60
-            price_total = s * price_seconds
-
-            print(f"INFORMAÇÕES - {plate_info}\n")
-            print(f"Placa: {car_info.license_plate}")
-            print(f"Modelo: {car_info.car_model}")
-            print(f"Cor: {car_info.color}")
-            print(f"Horário de entrada: {car_info.time}")
-            print(f"Vaga: {car_info.parking_lot}")
-            print(f"Tempo: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
-            print(f"Preço: R${price_total:.2f}")
-            input()
+            self.process_found_data()
         elif choose == 5:
             ut.erase_screen()
             print("Salvando dados...")
@@ -146,6 +54,107 @@ class parking:
     def check_in(self, license_plate, model, color, time, parking_lot, seconds):
         self.parking_lot[parking_lot] = car(license_plate, model, color, time, parking_lot, seconds)
         
+    def process_found_data(self):
+        ut.erase_screen()
+        print("Qual a PLACA do carro?")
+        plate_info = ut.read_name('PLACA INVÁLIDA!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
+        car_info = None
+        ut.erase_screen()
+        for spot, vehicle in self.parking_lot.items():
+            if vehicle is not None and vehicle.license_plate == plate_info:
+                car_info = vehicle
+        if car_info == None:
+            ut.ERROR('CARRO NÃO ENCONTRADO!')
+            input()
+            return
+            
+        seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
+        s = seconds_now - car_info.second
+        hours_total = s // 3600
+        minutes_total = (s % 3600) // 60
+        second_total = s % 60
+        price_total = s * price_seconds
+
+        print(f"INFORMAÇÕES - {plate_info}\n")
+        print(f"Placa: {car_info.license_plate}")
+        print(f"Modelo: {car_info.car_model}")
+        print(f"Cor: {car_info.color}")
+        print(f"Horário de entrada: {car_info.time}")
+        print(f"Vaga: {car_info.parking_lot}")
+        print(f"Tempo: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
+        print(f"Preço: R${price_total:.2f}")
+        input()
+
+    def process_checkin(self):
+        ut.erase_screen()
+        print(f"Qual a {ut.color("PLACA", "yellow")}, {ut.color('MODELO', 'green')} e {ut.color("COR", 'blue')}?")
+        plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres!', False, 7, 7).upper()
+        model = ut.read_name('Modelo inválido!', 'O modelo deve ter mais de 2 caracteres!', False).upper()
+        color = ut.read_name('Cor inválida!', 'A cor deve ter mais de 2 caracteres!').upper()
+
+        hour = datetime.now().strftime("%H:%M:%S")
+        now = datetime.now()
+        seconds_checkin = now.hour * 3600 + now.minute * 60 + now.second
+        for spot, vehicle in self.parking_lot.items():
+            if vehicle is None:
+                lot_parking = spot
+                break
+
+            
+        ut.erase_screen()
+        print(ut.color('VEICULO CADASTRADO!', 'green')) 
+        input()
+        while True:
+            ut.erase_screen()
+            self.show_parking()
+            print("Escolha uma vaga: (Deixe em branco para selecionar automaticamente)") 
+            lot = input().upper()
+            if lot == '':
+                print(f"VAGA: {lot_parking}")
+                break
+            elif lot in self.parking_lot and self.parking_lot[lot] is None:
+                print(f"VAGA: {lot}")
+                lot_parking = lot
+                break
+            else:
+                ut.ERROR('Vaga não encontrada ou já ocupada!')
+                input()
+
+        self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
+        input()
+        self.save_data()
+
+    def process_checkout(self):
+        ut.erase_screen()
+        print("Qual a placa do carro?")
+        check_out_car = None
+        license_plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
+        for spot, vehicle in self.parking_lot.items():
+            if vehicle is not None and vehicle.license_plate == license_plate:
+                check_out_car = vehicle
+        if check_out_car == None:
+            ut.erase_screen()
+            ut.ERROR('CARRO NÃO ENCONTRADO')
+            input()
+            return
+
+        ut.erase_screen()
+        seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
+        s = seconds_now - check_out_car.second
+        hours_total = s // 3600
+        minutes_total = (s % 3600) // 60
+        second_total = s % 60
+        price_total = s * price_seconds
+        print(ut.color('CHECK-OUT CONCLUIDO!', 'green'))
+        print(f"PLACA: {check_out_car.license_plate}")
+        print(f"MODELO: {check_out_car.car_model}")
+        print(f"VAGA: {check_out_car.parking_lot}")
+        print(f"TEMPO: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
+        print(f"PREÇO: R${price_total:.2f}")
+        self.parking_lot[check_out_car.parking_lot] = None
+        input()
+        self.save_data() 
+
     def show_parking(self):
         row = 0
         ut.erase_screen()
@@ -188,3 +197,5 @@ estacionamento = parking()
 end = False
 while not end:
     end = estacionamento.menu()
+
+# Next idea: Save in .txt a "receipt" for each checkout
