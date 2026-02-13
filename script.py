@@ -1,5 +1,6 @@
 import os, json, time
 from datetime import datetime
+import Utilities as ut
 
 # AJUSTE DE ACORDO COM SEU PREÇO
 price_hour = 30
@@ -8,10 +9,6 @@ price_hour = 30
 end_program = False
 price_minute = price_hour / 60
 price_seconds = price_minute / 60
-
-
-def erase_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 class car:
     def __init__(self, license_plate, car_model, color, time, parking_lot, seconds):
@@ -32,46 +29,18 @@ class parking:
         self.load_data()
 
     def menu(self):
-        while True:
-            erase_screen()
-            print("1. Check-in\n2. Check-out\n3. Listar carros\n4. Buscar dados\n5. Sair")
-            choose = input()
-            try:
-                float(choose)
-            except ValueError:
-                erase_screen()
-                print("ERRO! Digite um número!")
-                input()
-                return
-            
-            if float(choose) < 1 or float(choose) > 5:
-                erase_screen()
-                print("ERRO! Escolha um número válido!")
-                input()
-                return
-            break
+        menu = [ut.color('Check-in', "green"), ut.color('Check-out', "red"), ut.color("Listar carros", "yellow"), ut.color('Buscar dados', "blue"), 'Sair']
+        ut.erase_screen()
+        ut.print_menu(menu)
+        choose = ut.read_int('', 1, 5)
 
-        if choose == '1':
-            erase_screen()
-            print("Qual a PLACA, MODELO e COR?")
-            plate = input()
-            if plate == '':
-                erase_screen()
-                print("PLACA INVÁLIDA!")
-                input()
-                return
-            model = input()
-            if model == '':
-                erase_screen()
-                print("MODELO INVÁLIDA!")
-                input()
-                return
-            color = input()
-            if color == '':
-                erase_screen()
-                print("COR INVÁLIDA!")
-                input()
-                return
+        if choose == 1:
+            ut.erase_screen()
+            print(f"Qual a {ut.color("PLACA", "yellow")}, {ut.color('MODELO', 'green')} e {ut.color("COR", 'blue')}?")
+            plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres!', False, 7, 7).upper()
+            model = ut.read_name('Modelo inválido!', 'O modelo deve ter mais de 2 caracteres!', False).upper()
+            color = ut.read_name('Cor inválida!', 'A cor deve ter mais de 2 caracteres!').upper()
+
             hour = datetime.now().strftime("%H:%M:%S")
             now = datetime.now()
             seconds_checkin = now.hour * 3600 + now.minute * 60 + now.second
@@ -81,33 +50,33 @@ class parking:
                     break
 
             self.check_in(plate, model, color, hour, lot_parking, seconds_checkin)
-            erase_screen()
-            print("VEICULO CADASTRADO!")
+            ut.erase_screen()
+            print(ut.color('VEICULO CADASTRADO!', 'green'))
             print(f"VAGA: {lot_parking}")
             input()
             self.save_data()
-        elif choose == '2':
-            erase_screen()
+        elif choose == 2:
+            ut.erase_screen()
             print("Qual a placa do carro?")
             check_out_car = None
-            license_plate = input()
+            license_plate = ut.read_name('Placa inválida!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
             for spot, vehicle in self.parking_lot.items():
                 if vehicle is not None and vehicle.license_plate == license_plate:
                     check_out_car = vehicle
             if check_out_car == None:
-                erase_screen()
-                print("CARRO NÃO ENCONTRADO!")
+                ut.erase_screen()
+                ut.ERROR('CARRO NÃO ENCONTRADO')
                 input()
                 return
 
-            erase_screen()
+            ut.erase_screen()
             seconds_now = datetime.now().hour * 3600 + datetime.now().minute * 60 + datetime.now().second
             s = seconds_now - check_out_car.second
             hours_total = s // 3600
             minutes_total = (s % 3600) // 60
             second_total = s % 60
             price_total = s * price_seconds
-            print("CHECK-OUT CONCLUIDO!\n")
+            print(ut.color('CHECK-OUT CONCLUIDO!', 'green'))
             print(f"PLACA: {check_out_car.license_plate}")
             print(f"MODELO: {check_out_car.car_model}")
             print(f"VAGA: {check_out_car.parking_lot}")
@@ -116,19 +85,19 @@ class parking:
             self.parking_lot[check_out_car.parking_lot] = None
             input()
             self.save_data() 
-        elif choose == '3':
+        elif choose == 3:
             self.show_parking()
-        elif choose == '4':
-            erase_screen()
+        elif choose == 4:
+            ut.erase_screen()
             print("Qual a PLACA do carro?")
-            plate_info = input()
+            plate_info = ut.read_name('PLACA INVÁLIDA!', 'A placa deve ter 7 caracteres', False, 7, 7).upper()
             car_info = None
-            erase_screen()
+            ut.erase_screen()
             for spot, vehicle in self.parking_lot.items():
                 if vehicle is not None and vehicle.license_plate == plate_info:
                     car_info = vehicle
             if car_info == None:
-                print("CARRO NÃO ENCONTRADO!")
+                ut.ERROR('CARRO NÃO ENCONTRADO!')
                 input()
                 return
             
@@ -148,8 +117,8 @@ class parking:
             print(f"Tempo: {hours_total:02d}:{minutes_total:02d}:{second_total:02d}")
             print(f"Preço: R${price_total:.2f}")
             input()
-        elif choose == '5':
-            erase_screen()
+        elif choose == 5:
+            ut.erase_screen()
             print("Salvando dados...")
             time.sleep(0.5)
             print("Finalizando programa...")
@@ -161,16 +130,16 @@ class parking:
         
     def show_parking(self):
         row = 0
-        erase_screen()
+        ut.erase_screen()
         for spot, vehicle in self.parking_lot.items():
             row += 1
             if row == 10:
                 print()
                 row = 1
             if vehicle is None:
-                print(f"Vaga {spot}: [ VAZIA ]")
+                print(ut.color(f'Vaga {spot}: [ VAZIA ]', 'green'))
             else:
-                print(f"Vaga {spot}: [ {vehicle.license_plate} - {vehicle.car_model} ]")
+                print(ut.color(f'Vaga {spot}: [ {vehicle.license_plate} - {vehicle.car_model} ]', 'red'))
         input()
 
     def save_data(self):
@@ -181,8 +150,7 @@ class parking:
             else:
                 data_to_save[spot] = None
         
-        with open('parking_data.json', 'w', encoding='utf-8') as arquivo:
-            json.dump(data_to_save, arquivo, indent=4, ensure_ascii=False)
+        ut.save_data(data_to_save, 'parking_data.json')
     
     def load_data(self):
         if os.path.exists('parking_data.json'):
@@ -203,7 +171,3 @@ estacionamento = parking()
 end = False
 while not end:
     end = estacionamento.menu()
-
-
-# VOCE ESTÁ TENTANDO SALVAR OS DADOS DOS CARROS NO JSON, E ACABOU SE DEPARANDO COM UM ERRO, 
-# QUE ERRO? O JSON NAO CONSEGUE ARMAZENAR CLASSES, E VOCE ESTÁ PROCURANDO UMA ALTERNATIVA PRA ISSO
